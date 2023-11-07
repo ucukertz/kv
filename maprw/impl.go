@@ -43,9 +43,7 @@ func (s *Store[V]) Delete(k string) error {
 func (s *Store[V]) Clear() error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	for k := range s.m {
-		delete(s.m, k)
-	}
+	clear(s.m)
 	return nil
 }
 

@@ -1,4 +1,4 @@
-// package folder implements key value store on local folder
+// Package folder implements key value store on local folder
 package folder
 
 import (
