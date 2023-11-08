@@ -5,14 +5,19 @@ import (
 	"io"
 	"os"
 	"path"
+
+	"github.com/ucukertz/kv"
 )
 
 type Store[V []byte] struct {
 	dir string
 }
 
+var _ kv.Store[[]byte] = (*Store[[]byte])(nil)
+var _ kv.Bstore = (*Store[[]byte])(nil)
+
 func Create(dir string) *Store[[]byte] {
-	os.Mkdir(dir, os.ModePerm)
+	os.MkdirAll(dir, os.ModePerm)
 	return &Store[[]byte]{dir: dir}
 }
 
