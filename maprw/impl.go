@@ -33,7 +33,7 @@ func (s *Store[V]) Get(k string) (V, error) {
 	v, ok := s.m[k]
 	var err error = nil
 	if !ok {
-		err = fmt.Errorf("Reading key %s failed", k)
+		err = fmt.Errorf("maprw -> Reading key %s failed", k)
 	}
 	return v, err
 }

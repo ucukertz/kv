@@ -30,7 +30,7 @@ func Create[V any](dir string, name string) (*Store[V], error) {
 	}
 	file, err := os.OpenFile(fdir, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		return &Store[V]{}, err
+		return &Store[V]{}, fmt.Errorf("jsonf -> %w", err)
 	}
 
 	j := &Store[V]{file: file, m: map[string]V{}}
@@ -39,7 +39,7 @@ func Create[V any](dir string, name string) (*Store[V], error) {
 		content = []byte("{}")
 		_, err = file.Write(content)
 		if err != nil {
-			return &Store[V]{}, err
+			return &Store[V]{}, fmt.Errorf("jsonf -> %w", err)
 		}
 		return j, nil
 	}
@@ -48,7 +48,7 @@ func Create[V any](dir string, name string) (*Store[V], error) {
 		content = []byte("{}")
 		_, err = file.Write(content)
 		if err != nil {
-			return &Store[V]{}, err
+			return &Store[V]{}, fmt.Errorf("jsonf -> %w", err)
 		}
 	}
 	return j, nil
@@ -61,7 +61,10 @@ func (j *Store[V]) Set(k string, v V) error {
 	j.m[k] = v
 	content, _ := json.Marshal(j.m)
 	_, err := j.file.Write(content)
-	return err
+	if err != nil {
+		return fmt.Errorf("jsonf -> %w", err)
+	}
+	return nil
 }
 
 func (j *Store[V]) Get(k string) (V, error) {
@@ -71,7 +74,7 @@ func (j *Store[V]) Get(k string) (V, error) {
 	v, ok := j.m[k]
 	var err error
 	if !ok {
-		err = fmt.Errorf("Reading key %s failed", k)
+		err = fmt.Errorf("jsonf -> Reading key %s failed", k)
 	}
 	return v, err
 }
@@ -83,7 +86,10 @@ func (j *Store[V]) Delete(k string) error {
 	delete(j.m, k)
 	content, _ := json.Marshal(j.m)
 	_, err := j.file.Write(content)
-	return err
+	if err != nil {
+		return fmt.Errorf("jsonf -> %w", err)
+	}
+	return nil
 }
 
 func (j *Store[V]) Clear() error {
@@ -93,7 +99,10 @@ func (j *Store[V]) Clear() error {
 	clear(j.m)
 	content := []byte("{}")
 	_, err := j.file.Write(content)
-	return err
+	if err != nil {
+		return fmt.Errorf("jsonf -> %w", err)
+	}
+	return nil
 }
 
 func (j *Store[V]) Close() error {
@@ -101,5 +110,9 @@ func (j *Store[V]) Close() error {
 	defer j.mtx.Unlock()
 
 	clear(j.m)
-	return j.file.Close()
+	err := j.file.Close()
+	if err != nil {
+		return fmt.Errorf("jsonf -> %w", err)
+	}
+	return nil
 }
