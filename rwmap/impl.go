@@ -1,5 +1,5 @@
-// Package maprw implements key value store with go map and RWMutex for concurrency
-package maprw
+// Package rwmap implements key value store with go map and RWMutex for concurrency
+package rwmap
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type Store[V any] struct {
 var _ kv.Store[any] = (*Store[any])(nil)
 var _ kv.Bstore = (*Store[[]byte])(nil)
 
-func Create[V any]() *Store[V] {
+func Make[V any]() *Store[V] {
 	return &Store[V]{m: map[string]V{}}
 }
 
@@ -31,9 +31,9 @@ func (s *Store[V]) Get(k string) (V, error) {
 	s.mtx.RLock()
 	defer s.mtx.RUnlock()
 	v, ok := s.m[k]
-	var err error = nil
+	var err error
 	if !ok {
-		err = fmt.Errorf("maprw -> Reading key %s failed", k)
+		err = fmt.Errorf("%w rwmap get %s: %w", kv.ErrNotFound, k, err)
 	}
 	return v, err
 }
@@ -52,7 +52,7 @@ func (s *Store[V]) Clear() error {
 	return nil
 }
 
-func (s *Store[V]) Close() error {
-	s = Create[V]()
+func (s *Store[V]) Purge() error {
+	s = nil
 	return nil
 }

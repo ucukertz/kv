@@ -7,8 +7,23 @@ type Store[V any] interface {
 	Get(k string) (V, error)
 	Delete(k string) error
 	Clear() error
-	Close() error
+	Purge() error
 }
 
 // Key value store with []byte as value
 type Bstore Store[[]byte]
+
+type Error struct {
+	msg string
+}
+
+func (e *Error) Error() string {
+	return e.msg
+}
+
+var (
+	ErrHalt         = &Error{"KV halted"}
+	ErrUnauthorized = &Error{"KV unauthorized"}
+	ErrUnreachable  = &Error{"KV unreachable"}
+	ErrNotFound     = &Error{"KV not found"}
+)
