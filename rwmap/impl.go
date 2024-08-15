@@ -9,8 +9,8 @@ import (
 )
 
 type Store[V any] struct {
-	m   map[string]V
-	mtx sync.RWMutex
+	m map[string]V
+	*sync.RWMutex
 }
 
 var _ kv.Store[any] = (*Store[any])(nil)
@@ -21,15 +21,15 @@ func Make[V any]() *Store[V] {
 }
 
 func (s *Store[V]) Set(k string, v V) error {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.m[k] = v
 	return nil
 }
 
 func (s *Store[V]) Get(k string) (V, error) {
-	s.mtx.RLock()
-	defer s.mtx.RUnlock()
+	s.RLock()
+	defer s.RUnlock()
 	v, ok := s.m[k]
 	var err error
 	if !ok {
@@ -39,15 +39,15 @@ func (s *Store[V]) Get(k string) (V, error) {
 }
 
 func (s *Store[V]) Delete(k string) error {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	delete(s.m, k)
 	return nil
 }
 
 func (s *Store[V]) Clear() error {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	clear(s.m)
 	return nil
 }
